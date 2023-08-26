@@ -1,7 +1,7 @@
 import { createConnection } from "mysql";
 import { DefaultQueryResult, QueryResult } from "../typings/database";
 
-const database = createConnection({
+export const database = createConnection({
     database: process.env.db,
     user: process.env.user,
     host: process.env.host,

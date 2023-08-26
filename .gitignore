@@ -3,4 +3,4 @@
 test/
 node_modules/
 dist/
-logs.log
+*.log

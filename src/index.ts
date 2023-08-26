@@ -2,7 +2,7 @@ import { AmethystClient } from "amethystjs";
 import { config } from "dotenv";
 config()
 
-const client = new AmethystClient({
+export const client = new AmethystClient({
     intents: ['Guilds']
 }, {
     token: process.env.token,
