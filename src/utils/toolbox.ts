@@ -1,8 +1,9 @@
-import { ActionRowBuilder, AnyComponentBuilder, ButtonBuilder, ButtonInteraction, ButtonStyle, CommandInteraction, ComponentType, InteractionReplyOptions } from "discord.js";
+import { ActionRowBuilder, AnyComponentBuilder, BaseInteraction, ButtonBuilder, ButtonInteraction, ButtonStyle, CommandInteraction, ComponentType, Guild, InteractionReplyOptions } from "discord.js";
 import perms from '../data/perms.json';
 import { permType } from "../typings/utils";
 import { station } from "../typings/station";
 import stationsList from '../data/stations.json';
+import player from "../cache/player";
 
 export const capitalize = (str: string) => {
     if (str.length < 1) return str;
@@ -107,3 +108,8 @@ export const getChannelPerm = (key: permType<'channel'>) => {
 export const stations = (): station[] => {
     return stationsList
 }
+export const getNode = (guild: Guild | BaseInteraction) => {
+    guild = guild instanceof Guild ? guild : guild.guild;
+    return player.nodes.get(guild);
+}
+export const getStation = (url: string) => stations().find(x => x.url === url);

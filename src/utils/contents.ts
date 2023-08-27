@@ -25,3 +25,7 @@ export const missingPermissions = (user: userResolvable, permissions: Permission
 
     return embed
 }
+export const notConnected = (user: userResolvable) => baseDenied(user, "salon vocal").setDescription(`Vous n'êtes pas connecté dans un salon vocal`)
+export const alreadyPlaying = (user: userResolvable) => baseDenied(user, 'musique en cours').setDescription(`Je suis déjà en train de jouer de la musique`)
+export const notPlaying = (user: userResolvable) => baseDenied(user, "pas de musique").setDescription(`Je ne suis pas en train de jouer de la musique`)
+export const notSameChannel = (user: userResolvable) => baseDenied(user, 'Pas le même salon').setDescription(`Vous n'êtes pas connecté dans le même salon que moi`)

@@ -17,6 +17,7 @@ export default new AmethystEvent('commandDenied', (command, reason) => {
             }).catch(log4js.trace)
         }
 
+        if (reason.metadata.silent === true) return;
         command.interaction.reply({
             content: ":x: | Échec de l'interaction",
             ephemeral: true
