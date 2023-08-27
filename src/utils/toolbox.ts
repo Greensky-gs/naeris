@@ -1,4 +1,6 @@
 import { ActionRowBuilder, AnyComponentBuilder, ButtonBuilder, ButtonInteraction, ButtonStyle, CommandInteraction, ComponentType, InteractionReplyOptions } from "discord.js";
+import perms from '../data/perms.json';
+import { permType } from "../typings/utils";
 
 export const capitalize = (str: string) => {
     if (str.length < 1) return str;
@@ -93,4 +95,10 @@ export const msToSentence = (time: number, multiply = false) => {
     });
 
     return str;
+};
+export const getRolePerm = (key: permType<'role'>) => {
+    return perms.role[key];
+};
+export const getChannelPerm = (key: permType<'channel'>) => {
+    return perms.channel[key];
 };

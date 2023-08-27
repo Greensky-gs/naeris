@@ -15,7 +15,8 @@ export const client = new AmethystClient({
     waitForDefaultReplies: {
         everyone: "Vous n'êtes pas autorisé à interagir avec ce message",
         user: "Vous n'êtes pas autorisé à interagir avec ce message"
-    }
+    },
+    defaultCooldownTime: 0
 })
 
 client.start({});
