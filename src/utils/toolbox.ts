@@ -4,7 +4,10 @@ import { permType } from "../typings/utils";
 import { station } from "../typings/station";
 import stationsList from '../data/stations.json';
 import player from "../cache/player";
-import { userResolvable } from "shop-manager";
+import { guildResolvable, userResolvable } from "shop-manager";
+import pnjs from '../data/pnj.json'
+import { pnj as pnjType } from "../typings/client";
+import shop from "../cache/shop";
 
 export const capitalize = (str: string) => {
     if (str.length < 1) return str;
@@ -115,3 +118,28 @@ export const getNode = (guild: Guild | BaseInteraction) => {
 }
 export const getStation = (url: string) => stations().find(x => x.url === url);
 export const pingUser = (user: userResolvable) => `<@${user instanceof User || user instanceof GuildMember ? user.id : user instanceof BaseInteraction ? user.user.id : user instanceof Message ? user.author.id : user}>`
+export const pnj = (name: keyof typeof pnjs): pnjType => pnjs[name];
+export const pnjTalk = (resolvable: keyof typeof pnjs | pnjType) => {
+    const { name, emoji } = typeof resolvable === 'string' ? pnj(resolvable) : resolvable;
+    return `${emoji} **${name} :**`
+}
+export const resize = (str: string, length = 100) => {
+    if (str.length <= length) return str;
+    return str.slice(0, str.length - 2) + '...'
+}
+export const getItem = ({ query, guild, interaction, user }: { query: string; guild: guildResolvable; interaction: ButtonInteraction; user: User }) => {
+    const list = shop.guildItems(guild)
+    query = query.toLowerCase()
+
+    const selected = list.filter(x => 
+        x.name.toLowerCase().includes(query) ||
+        query.includes(x.name.toLowerCase()) ||
+        x.content.toLowerCase().includes(query) ||
+        query.includes(x.content.toLowerCase())
+    )
+
+    if (!selected.size) return undefined;
+    if (selected.size === 1) return selected
+
+    
+}
