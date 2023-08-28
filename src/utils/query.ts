@@ -5,7 +5,7 @@ export const database = createConnection({
     database: process.env.db,
     user: process.env.user,
     host: process.env.host,
-    password: process.env.host
+    password: process.env.password
 });
 
 export const query = <T = DefaultQueryResult>(query: string): Promise<QueryResult<T>> => {
