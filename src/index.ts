@@ -10,6 +10,7 @@ export const client = new AmethystClient({
     eventsFolder: './dist/events',
     preconditionsFolder: './dist/preconditions',
     buttonsFolder: './dist/buttons',
+    autocompleteListenersFolder: './dist/autocompletes',
     botName: 'Naéris',
     debug: true,
     waitForDefaultReplies: {
