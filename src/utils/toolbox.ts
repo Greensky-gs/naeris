@@ -1,9 +1,10 @@
-import { ActionRowBuilder, AnyComponentBuilder, BaseInteraction, ButtonBuilder, ButtonInteraction, ButtonStyle, CommandInteraction, ComponentType, Guild, InteractionReplyOptions } from "discord.js";
+import { ActionRowBuilder, AnyComponentBuilder, BaseInteraction, ButtonBuilder, ButtonInteraction, ButtonStyle, CommandInteraction, ComponentType, Guild, GuildMember, InteractionReplyOptions, Message, User } from "discord.js";
 import perms from '../data/perms.json';
 import { permType } from "../typings/utils";
 import { station } from "../typings/station";
 import stationsList from '../data/stations.json';
 import player from "../cache/player";
+import { userResolvable } from "shop-manager";
 
 export const capitalize = (str: string) => {
     if (str.length < 1) return str;
@@ -113,3 +114,4 @@ export const getNode = (guild: Guild | BaseInteraction) => {
     return player.nodes.get(guild);
 }
 export const getStation = (url: string) => stations().find(x => x.url === url);
+export const pingUser = (user: userResolvable) => `<@${user instanceof User || user instanceof GuildMember ? user.id : user instanceof BaseInteraction ? user.user.id : user instanceof Message ? user.author.id : user}>`
