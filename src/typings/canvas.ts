@@ -7,3 +7,11 @@ export type coinsImage = {
         pp: string
     };
 }
+export type leaderboardImage = {
+    coins: account<'multiguild'>;
+    user: {
+        username: string;
+        pp: string;
+    };
+    place: number;
+}
