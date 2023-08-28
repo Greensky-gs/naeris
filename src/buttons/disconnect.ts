@@ -1,5 +1,5 @@
 import { ButtonHandler, log4js } from "amethystjs";
-import { ButtonIds } from "../utils/client";
+import { ButtonIds } from "../typings/client";
 import { getNode } from "../utils/toolbox";
 
 export default new ButtonHandler({

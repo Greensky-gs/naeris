@@ -1,5 +1,5 @@
 import { Canvas } from "canvas";
-import { ButtonInteraction, CommandInteraction, User } from "discord.js"
+import { CommandInteraction, ButtonInteraction, User } from "discord.js";
 
 export enum ButtonIds {
     addCoins = 'panel.coins.add',
@@ -15,4 +15,8 @@ export type paginatorOptions<T = any> = {
     mapper: (options: T) => Promise<Canvas>
     name: string;
     time?: number;
+}
+export type pnj = {
+    name: string;
+    emoji: string;
 }

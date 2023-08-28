@@ -1,5 +1,5 @@
 import { ButtonHandler, log4js, waitForInteraction } from "amethystjs";
-import { ButtonIds } from "../utils/client";
+import { ButtonIds } from "../typings/client";
 import { row, button as buttonBuilder } from "../utils/toolbox";
 import { ComponentType, Message } from "discord.js";
 

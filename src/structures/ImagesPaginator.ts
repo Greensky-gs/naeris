@@ -1,5 +1,5 @@
 import { AttachmentBuilder, ButtonInteraction, CommandInteraction, ComponentType, InteractionReplyOptions, ModalBuilder, TextInputBuilder, TextInputStyle, User } from "discord.js";
-import { paginatorOptions } from "../utils/client";
+import { paginatorOptions } from "../typings/client";
 import { Canvas } from "canvas";
 import { button, numerize, row, systemReply } from "../utils/toolbox";
 import { log4js } from "amethystjs";
