@@ -1,5 +1,5 @@
 import { log4js } from "amethystjs";
-import { Client, TextChannel } from "discord.js";
+import { Client, Collection, Message, TextChannel } from "discord.js";
 import { base } from "../utils/contents";
 import { button, pingUser, row } from "../utils/toolbox";
 import { ButtonIds } from "../utils/client";
@@ -44,7 +44,8 @@ export class Panel {
             throw new Error('No panel channel found')
         }
 
-        await this.channel.bulkDelete(100).catch(log4js.trace)
+        let toDelete = (((await this.channel.messages.fetch().catch(log4js.trace)) ?? new Collection()) as Collection<string, Message<true>>).filter(x => x.deletable).toJSON().slice(0, 99)
+        await this.channel.bulkDelete(toDelete).catch(log4js.trace)
         const msg = await this.channel.send({
             embeds: [ base(this.client.user).setColor('#8177E5').setTitle("Panel de contrôle").setDescription(`Panel de contrôle de ${pingUser(this.client.user)}`) ],
             components: this.components
