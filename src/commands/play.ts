@@ -33,8 +33,8 @@ export default new AmethystCommand({
 
     if (!search || !search.tracks.length)  return interaction.editReply(`:x: | La musique n'a pas été trouvée`).catch(log4js.trace)
 
-    const res = await player.play(member.voice.channel, search.tracks[0], {nodeOptions: { selfDeaf: true, leaveOnEmpty: true, leaveOnEnd: true, leaveOnEmptyCooldown: 10000, leaveOnEndCooldown: 10000, leaveOnStop: true, leaveOnStopCooldown: 10000 }}).catch(log4js.trace)
+    const res = await player.play(member.voice.channel, search.tracks[0], {nodeOptions: { selfDeaf: true, leaveOnEmpty: true, leaveOnEnd: true, leaveOnEmptyCooldown: 10000, leaveOnEndCooldown: 10000, leaveOnStop: true, leaveOnStopCooldown: 10000, volume: 90 }}).catch(log4js.trace)
 
     if (!res) return interaction.editReply(":x: | La musique n'a pas pu être jouée").catch(log4js.trace)
-    interaction.reply(`Lecture de **${station.name}**`).catch(log4js.trace)
+    interaction.editReply(`Lecture de **${station.name}**`).catch(log4js.trace)
 })
