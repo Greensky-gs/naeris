@@ -1,9 +1,12 @@
 import { AmethystClient } from "amethystjs";
+import { Partials } from "discord.js";
 import { config } from "dotenv";
 config()
 
 export const client = new AmethystClient({
-    intents: ['Guilds', 'GuildVoiceStates']
+    // intents: ['Guilds', 'GuildVoiceStates', 'GuildMembers'],
+    intents: ['Guilds', 'GuildVoiceStates'], // This is temporary
+    partials: [Partials.GuildMember]
 }, {
     token: process.env.token,
     commandsFolder: './dist/commands',
