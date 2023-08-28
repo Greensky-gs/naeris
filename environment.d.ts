@@ -6,6 +6,7 @@ declare global {
             user: string;
             password: string;
             host: string;
+            panel: string;
         }
     }
 }
