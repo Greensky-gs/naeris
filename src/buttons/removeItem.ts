@@ -15,5 +15,5 @@ export default new ButtonHandler({
     }).catch(log4js.trace)
     if (!item) return;
 
-    shop.removeItem(item.id);
+    shop.removeItem(item.value.id);
 })

@@ -1,6 +1,6 @@
 import { ActionRowBuilder, AnyComponentBuilder, AnySelectMenuInteraction, BaseInteraction, ButtonBuilder, ButtonInteraction, ButtonStyle, Collection, CommandInteraction, ComponentType, ContextMenuCommandInteraction, Guild, GuildMember, InteractionReplyOptions, Message, ModalBuilder, SelectMenuComponentOptionData, StringSelectMenuBuilder, TextInputBuilder, TextInputStyle, User } from "discord.js";
 import perms from '../data/perms.json';
-import { confirmReturn, permType } from "../typings/utils";
+import { confirmReturn, permType, selectOptions, selectReturn } from "../typings/utils";
 import { station } from "../typings/station";
 import stationsList from '../data/stations.json';
 import player from "../cache/player";
@@ -129,7 +129,7 @@ export const resize = (str: string, length = 100) => {
     if (str.length <= length) return str;
     return str.slice(0, str.length - 2) + '...'
 }
-export const getItem = async({ guild, interaction, user }: { guild: guildResolvable; interaction: ButtonInteraction; user: User }): Promise<void | item> => {
+export const getItem = async({ guild, interaction, user }: { guild: guildResolvable; interaction: ButtonInteraction; user: User }) => {
     return await select({
         interaction, user,
         list: shop.guildItems(interaction),
@@ -149,14 +149,16 @@ export const getItem = async({ guild, interaction, user }: { guild: guildResolva
             title: "Item",
             label: 'Nom',
             placeholder: "Nom de l'item"
-        }
+        },
+        deleteModal: false
     });
 }
-export const select = <T>({
+export const select = <T, D extends boolean>({
     interaction, user, list, selectMenuOption, filter,
     modal = { title: "Recherche d'éléments", label: 'Recherche', placeholder: "votre recherche" },
-    elementName = 'éléments'
-}: { interaction: ButtonInteraction; user: User; list: Collection<string | number, T>; modal?: { title?: string; label?: string; placeholder?: string }, elementName?: string, selectMenuOption: (opt: T, index: number) => SelectMenuComponentOptionData, filter: (opt: T, query: string) => boolean }): Promise<void | T> => {
+    elementName = 'éléments',
+    deleteModal = true as D
+}: selectOptions<T, D>): selectReturn<T, D> => {
     return new Promise(async (resolve) => {
         await interaction.showModal(
             new ModalBuilder()
@@ -176,7 +178,7 @@ export const select = <T>({
         const rep = await interaction.awaitModalSubmit({
             time: 300000
         }).catch(log4js.trace)
-        if (!rep) return resolve();
+        if (!rep) return resolve(void 0);
 
         const query = rep.fields.getTextInputValue('query').toLowerCase()
 
@@ -225,7 +227,7 @@ export const select = <T>({
         const id = typeof [...list.keys()][0] === 'string' ? res.values[0] : parseInt(res.values[0])
 
         return resolve(selected.get(id))
-    })
+    }) as selectReturn<T, D>
 }
 export const confirm = <T extends CommandInteraction | ButtonInteraction | AnySelectMenuInteraction | ContextMenuCommandInteraction>({
     interaction,
