@@ -970,10 +970,10 @@ set-blocking@^2.0.0:
   resolved "https://registry.yarnpkg.com/set-blocking/-/set-blocking-2.0.0.tgz#045f9782d011ae9a6803ddd382b24392b3d890f7"
   integrity sha512-KiKBS8AnWGEyLzofFfmvKwpdPzqiy16LvQfK3yv/fVH7Bj13/wl3JSR1J+rfgRE9q7xUJK4qvgS8raSOeLUehw==
 
-shop-manager@^0.0.1:
-  version "0.0.1"
-  resolved "https://registry.yarnpkg.com/shop-manager/-/shop-manager-0.0.1.tgz#1c501f29b131583be20de420d38a4321e8c52936"
-  integrity sha512-oLQ0BR350Ael2p4OmbLY+JaaAGu64oS3sTSusJmbl+Os/szZ91m7mG9y1bWiU1TK6PdDgVhQVKtB8RAciawKww==
+shop-manager@^0.0.2:
+  version "0.0.2"
+  resolved "https://registry.yarnpkg.com/shop-manager/-/shop-manager-0.0.2.tgz#162d0134ba08c05dd763623c1a438ee79b07ce1d"
+  integrity sha512-3knFEfAKOjOgAMAADjhCcA3i7GyRbJ0HRJWw59XOpwE6OtqOrmLidaK4dsGKQzGj6vba7w9LGGuZ5cKWTEHuog==
   dependencies:
     "@types/mysql" "^2.15.21"
     discord.js "^14.13.0"
