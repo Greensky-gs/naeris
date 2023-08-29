@@ -1,4 +1,4 @@
-import { ActionRowBuilder, AnyComponentBuilder, AnySelectMenuInteraction, BaseInteraction, ButtonBuilder, ButtonInteraction, ButtonStyle, CommandInteraction, ComponentType, ContextMenuCommandInteraction, Guild, GuildMember, InteractionReplyOptions, Message, ModalBuilder, StringSelectMenuBuilder, TextInputBuilder, TextInputStyle, User } from "discord.js";
+import { ActionRowBuilder, AnyComponentBuilder, AnySelectMenuInteraction, BaseInteraction, ButtonBuilder, ButtonInteraction, ButtonStyle, Collection, CommandInteraction, ComponentType, ContextMenuCommandInteraction, Guild, GuildMember, InteractionReplyOptions, Message, ModalBuilder, SelectMenuComponentOptionData, StringSelectMenuBuilder, TextInputBuilder, TextInputStyle, User } from "discord.js";
 import perms from '../data/perms.json';
 import { confirmReturn, permType } from "../typings/utils";
 import { station } from "../typings/station";
@@ -9,6 +9,7 @@ import pnjs from '../data/pnj.json'
 import { pnj as pnjType } from "../typings/client";
 import shop from "../cache/shop";
 import { log4js, waitForInteraction } from "amethystjs";
+import { writeFileSync } from 'node:fs'
 
 export const capitalize = (str: string) => {
     if (str.length < 1) return str;
@@ -128,19 +129,46 @@ export const resize = (str: string, length = 100) => {
     if (str.length <= length) return str;
     return str.slice(0, str.length - 2) + '...'
 }
-export const getItem = ({ guild, interaction, user }: { guild: guildResolvable; interaction: ButtonInteraction; user: User }): Promise<void | item> => {
+export const getItem = async({ guild, interaction, user }: { guild: guildResolvable; interaction: ButtonInteraction; user: User }): Promise<void | item> => {
+    return await select({
+        interaction, user,
+        list: shop.guildItems(interaction),
+        filter: ((x, query) => 
+            x.name.toLowerCase().includes(query) ||
+            query.includes(x.name.toLowerCase()) ||
+            x.content.toLowerCase().includes(query) ||
+            query.includes(x.content.toLowerCase())
+        ),
+        selectMenuOption: (sel, i) => ({
+            label: resize(sel.name),
+            description: sel.type === 'role' ? `Rôle <@&${sel.content}>` : resize(sel.content),
+            value: sel.id.toString()
+        }),
+        elementName: 'items',
+        modal: {
+            title: "Item",
+            label: 'Nom',
+            placeholder: "Nom de l'item"
+        }
+    });
+}
+export const select = <T>({
+    interaction, user, list, selectMenuOption, filter,
+    modal = { title: "Recherche d'éléments", label: 'Recherche', placeholder: "votre recherche" },
+    elementName = 'éléments'
+}: { interaction: ButtonInteraction; user: User; list: Collection<string | number, T>; modal?: { title?: string; label?: string; placeholder?: string }, elementName?: string, selectMenuOption: (opt: T, index: number) => SelectMenuComponentOptionData, filter: (opt: T, query: string) => boolean }): Promise<void | T> => {
     return new Promise(async (resolve) => {
         await interaction.showModal(
             new ModalBuilder()
-                .setTitle("Item")
+                .setTitle(modal?.title ?? "Recherche d'éléments")
                 .setCustomId('select-item')
                 .setComponents(
                     row(
                         new TextInputBuilder()
                             .setRequired(true)
-                            .setLabel('item')
+                            .setLabel(modal?.label ?? 'Élément')
                             .setCustomId('query')
-                            .setPlaceholder("Nom de l'item")
+                            .setPlaceholder(modal?.placeholder ?? 'votre recherche')
                             .setStyle(TextInputStyle.Short)
                     )
                 )
@@ -151,14 +179,8 @@ export const getItem = ({ guild, interaction, user }: { guild: guildResolvable; 
         if (!rep) return resolve();
 
         const query = rep.fields.getTextInputValue('query').toLowerCase()
-        const list = shop.guildItems(guild)
-    
-        const selected = list.filter(x => 
-            x.name.toLowerCase().includes(query) ||
-            query.includes(x.name.toLowerCase()) ||
-            x.content.toLowerCase().includes(query) ||
-            query.includes(x.content.toLowerCase())
-        )
+
+        const selected = list.filter(x => filter(x, query))
     
         const defer = () => {
             rep.deferUpdate().catch(log4js.trace)
@@ -176,21 +198,17 @@ export const getItem = ({ guild, interaction, user }: { guild: guildResolvable; 
             const base = (i: number) => new StringSelectMenuBuilder().setCustomId(i.toString()).setMaxValues(1)
             const rows = [base(0)];
             
-            selected.forEach((sel, i) => {
+            selected.toJSON().forEach((sel, i) => {
                 if (i % 25 === 0 && i > 0) rows.push(base(i))
 
-                rows[rows.length - 1].addOptions({
-                    label: resize(sel.name),
-                    description: sel.type === 'role' ? `Rôle <@&${sel.content}>` : resize(sel.content),
-                    value: sel.id.toString()
-                });
+                rows[rows.length - 1].addOptions(selectMenuOption(sel, i));
             })
 
             return rows.map(x => row(x));
         }
 
         const msg = await rep.reply({
-            content: `**${numerize(selected.size)}** items correspondent à votre recherche. Lequel souhaitez-vous utiliser ?`,
+            content: `**${numerize(selected.size)}** ${elementName} correspondent à votre recherche. Lequel souhaitez-vous utiliser ?`,
             components: components(),
             fetchReply: true
         }).catch(log4js.trace) as Message<true>;
@@ -204,12 +222,10 @@ export const getItem = ({ guild, interaction, user }: { guild: guildResolvable; 
         rep.deleteReply().catch(log4js.trace)
 
         if (!res) return resolve()
-        const id = parseInt(res.values[0])
+        const id = typeof [...list.keys()][0] === 'string' ? res.values[0] : parseInt(res.values[0])
 
         return resolve(selected.get(id))
     })
-
-    
 }
 export const confirm = <T extends CommandInteraction | ButtonInteraction | AnySelectMenuInteraction | ContextMenuCommandInteraction>({
     interaction,
@@ -255,3 +271,33 @@ export const confirm = <T extends CommandInteraction | ButtonInteraction | AnySe
         });
     });
 };
+export const getStationByUrl = (url: string) => stations().find(x => x.url === url)
+export const addStation = (station: station) => {
+    if (!getStationByUrl(station.url)) {
+        stationsList.push(station)
+        writeFileSync('./dist/data/stations.json', JSON.stringify(stationsList, null, 4))
+    }
+}
+export const removeStation = (station: station) => {
+    if (getStationByUrl(station.url)) {
+        stationsList.splice(stationsList.indexOf(stationsList.find(x => x.url === station.url)), 1);
+        writeFileSync('./dist/data/stations.json', JSON.stringify(stationsList, null, 4))
+    }
+}
+export const selectStation = async({ user, interaction }: { user: User; interaction: ButtonInteraction }) => {
+    const rep = await select({
+        user,
+        interaction,
+        list: new Collection(stations().map(x => [x.url, x])),
+        filter: (opt, query) => opt.name.toLowerCase().includes(query) || query.includes(opt.name.toLowerCase()),
+        selectMenuOption: (opt) => ({ label: opt.name, description: `Musique ${opt.name}`, value: opt.url }),
+        elementName: 'musiques',
+        modal: {
+            title: "Recherche de musiques",
+            label: 'Musique',
+            placeholder: "Nom de la musique"
+        }
+    }).catch(log4js.trace)
+    if (!rep) return;
+    return rep;
+}

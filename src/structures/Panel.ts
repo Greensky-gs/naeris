@@ -40,13 +40,23 @@ export class Panel {
         row(
             button({
                 label: 'Créer un item',
-                style: 'Secondary',
+                style: 'Primary',
                 id: ButtonIds.addItem
             }),
             button({
                 label: 'Supprimer un item',
-                style: 'Secondary',
+                style: 'Primary',
                 id: ButtonIds.removeItem
+            }),
+            button({
+                label: 'Ajouter une musique',
+                style: 'Secondary',
+                id: ButtonIds.createStation
+            }),
+            button({
+                label: 'Supprimer une musique',
+                style: 'Secondary',
+                id: ButtonIds.deleteStation
             })
         )]
     }
