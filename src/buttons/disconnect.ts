@@ -1,9 +1,11 @@
 import { ButtonHandler, log4js } from "amethystjs";
 import { ButtonIds } from "../typings/client";
 import { getNode } from "../utils/toolbox";
+import ownerOnly from "../preconditions/ownerOnly";
 
 export default new ButtonHandler({
-    customId: ButtonIds.disconnect
+    customId: ButtonIds.disconnect,
+    preconditions: [ownerOnly]
 }).setRun(async({ button, user }) => {
     const node = getNode(button)
 

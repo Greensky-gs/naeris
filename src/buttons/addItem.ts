@@ -4,9 +4,11 @@ import { ComponentType, Message, ModalBuilder, RoleSelectMenuBuilder, TextInputB
 import { row, button as buttonBuilder } from "../utils/toolbox";
 import { itemType } from "shop-manager";
 import shop from "../cache/shop";
+import ownerOnly from "../preconditions/ownerOnly";
 
 export default new ButtonHandler({
-    customId: ButtonIds.addItem
+    customId: ButtonIds.addItem,
+    preconditions: [ownerOnly]
 }).setRun(async({ button, user }) => {
     const msg = await button.reply({
         fetchReply: true,

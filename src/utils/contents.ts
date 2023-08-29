@@ -29,3 +29,4 @@ export const notConnected = (user: userResolvable) => baseDenied(user, "salon vo
 export const alreadyPlaying = (user: userResolvable) => baseDenied(user, 'musique en cours').setDescription(`Je suis déjà en train de jouer de la musique`)
 export const notPlaying = (user: userResolvable) => baseDenied(user, "pas de musique").setDescription(`Je ne suis pas en train de jouer de la musique`)
 export const notSameChannel = (user: userResolvable) => baseDenied(user, 'Pas le même salon').setDescription(`Vous n'êtes pas connecté dans le même salon que moi`)
+export const ownerOnly = (user: userResolvable) => baseDenied(user, "Propriétaire uniquement").setDescription(`Seul le propriétaire du bot est autorisé à effectuer cette commande`)

@@ -3,10 +3,12 @@ import { ButtonIds } from "../typings/client";
 import { numerize, pingUser, row } from "../utils/toolbox";
 import { ComponentType, Message, ModalBuilder, TextInputBuilder, TextInputStyle, UserSelectMenuBuilder } from "discord.js";
 import coins from "../cache/coins";
+import ownerOnly from "../preconditions/ownerOnly";
 
 export default new ButtonHandler({
     customId: ButtonIds.addCoins,
-    identifiers: [ButtonIds.removeCoins]
+    identifiers: [ButtonIds.removeCoins],
+    preconditions: [ownerOnly]
 }).setRun(async({ button, user }) => {
     const actionText = button.customId === ButtonIds.addCoins ? 'ajouter du gold' : 'retirer du gold';
     const miniAction = button.customId === ButtonIds.addCoins ? 'ajouter' : 'retirer'

@@ -2,9 +2,11 @@ import { ButtonHandler, log4js, waitForInteraction } from "amethystjs";
 import { ButtonIds } from "../typings/client";
 import { row, button as buttonBuilder } from "../utils/toolbox";
 import { ComponentType, Message } from "discord.js";
+import ownerOnly from "../preconditions/ownerOnly";
 
 export default new ButtonHandler({
-    customId: ButtonIds.reboot
+    customId: ButtonIds.reboot,
+    preconditions: [ownerOnly]
 }).setRun(async({ button, user }) => {
     const res = await button.reply({
         content: `Redémarrage <t:${Math.floor((Date.now() + 10000) / 1000)}:R>`,
