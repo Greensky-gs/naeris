@@ -1,5 +1,5 @@
-import { createConnection } from "mysql";
-import { DefaultQueryResult, QueryResult } from "../typings/database";
+import { createConnection } from 'mysql';
+import { DefaultQueryResult, QueryResult } from '../typings/database';
 
 export const database = createConnection({
     database: process.env.db,
@@ -11,8 +11,8 @@ export const database = createConnection({
 export const query = <T = DefaultQueryResult>(query: string): Promise<QueryResult<T>> => {
     return new Promise((resolve, reject) => {
         database.query(query, (error, request) => {
-            if (error) return reject(error)
-            return resolve(request)
-        })
-    })
-}
+            if (error) return reject(error);
+            return resolve(request);
+        });
+    });
+};

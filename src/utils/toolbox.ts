@@ -1,22 +1,45 @@
-import { ActionRowBuilder, AnyComponentBuilder, AnySelectMenuInteraction, BaseInteraction, ButtonBuilder, ButtonInteraction, ButtonStyle, Collection, CommandInteraction, ComponentType, ContextMenuCommandInteraction, Guild, GuildMember, InteractionReplyOptions, Message, ModalBuilder, Role, SelectMenuComponentOptionData, StringSelectMenuBuilder, TextInputBuilder, TextInputStyle, User } from "discord.js";
+import {
+    ActionRowBuilder,
+    AnyComponentBuilder,
+    AnySelectMenuInteraction,
+    BaseInteraction,
+    ButtonBuilder,
+    ButtonInteraction,
+    ButtonStyle,
+    Collection,
+    CommandInteraction,
+    ComponentType,
+    ContextMenuCommandInteraction,
+    Guild,
+    GuildMember,
+    InteractionReplyOptions,
+    Message,
+    ModalBuilder,
+    Role,
+    SelectMenuComponentOptionData,
+    StringSelectMenuBuilder,
+    TextInputBuilder,
+    TextInputStyle,
+    User
+} from 'discord.js';
 import perms from '../data/perms.json';
-import { confirmReturn, permType, selectOptions, selectReturn } from "../typings/utils";
-import { station } from "../typings/station";
+import { confirmReturn, permType, selectOptions, selectReturn } from '../typings/utils';
+import { station } from '../typings/station';
 import stationsList from '../data/stations.json';
-import player from "../cache/player";
-import { guildResolvable, item, userResolvable } from "shop-manager";
-import pnjs from '../data/pnj.json'
-import { pnj as pnjType } from "../typings/client";
-import shop from "../cache/shop";
-import { log4js, waitForInteraction } from "amethystjs";
-import { writeFileSync } from 'node:fs'
+import player from '../cache/player';
+import { guildResolvable, item, userResolvable } from 'shop-manager';
+import pnjs from '../data/pnj.json';
+import { pnj as pnjType } from '../typings/client';
+import shop from '../cache/shop';
+import { log4js, waitForInteraction } from 'amethystjs';
+import { writeFileSync } from 'node:fs';
 
 export const capitalize = (str: string) => {
     if (str.length < 1) return str;
     if (str.length === 1) return str.toUpperCase();
     return str[0].toUpperCase() + str.slice(1);
 };
-export const random = ({ max = 100, min = 0 }: { max: number; min: number; }): number => {
+export const random = ({ max = 100, min = 0 }: { max: number; min: number }): number => {
     if (max < min) {
         const oldMax = max;
         max = min;
@@ -112,33 +135,50 @@ export const getChannelPerm = (key: permType<'channel'>) => {
     return perms.channel[key];
 };
 export const stations = (): station[] => {
-    return stationsList
-}
+    return stationsList;
+};
 export const getNode = (guild: Guild | BaseInteraction) => {
     guild = guild instanceof Guild ? guild : guild.guild;
     return player.nodes.get(guild);
-}
-export const getStation = (url: string) => stations().find(x => x.url === url);
-export const pingUser = (user: userResolvable) => `<@${user instanceof User || user instanceof GuildMember ? user.id : user instanceof BaseInteraction ? user.user.id : user instanceof Message ? user.author.id : user}>`
+};
+export const getStation = (url: string) => stations().find((x) => x.url === url);
+export const pingUser = (user: userResolvable) =>
+    `<@${
+        user instanceof User || user instanceof GuildMember
+            ? user.id
+            : user instanceof BaseInteraction
+            ? user.user.id
+            : user instanceof Message
+            ? user.author.id
+            : user
+    }>`;
 export const pnj = (name: keyof typeof pnjs): pnjType => pnjs[name];
 export const pnjTalk = (resolvable: keyof typeof pnjs | pnjType) => {
     const { name, emoji } = typeof resolvable === 'string' ? pnj(resolvable) : resolvable;
-    return `${emoji} **${name} :**`
-}
+    return `${emoji} **${name} :**`;
+};
 export const resize = (str: string, length = 100) => {
     if (str.length <= length) return str;
-    return str.slice(0, str.length - 2) + '...'
-}
-export const getItem = async({ guild, interaction, user }: { guild: guildResolvable; interaction: ButtonInteraction; user: User }) => {
+    return str.slice(0, str.length - 2) + '...';
+};
+export const getItem = async ({
+    guild,
+    interaction,
+    user
+}: {
+    guild: guildResolvable;
+    interaction: ButtonInteraction;
+    user: User;
+}) => {
     return await select({
-        interaction, user,
+        interaction,
+        user,
         list: shop.guildItems(interaction),
-        filter: ((x, query) => 
+        filter: (x, query) =>
             x.name.toLowerCase().includes(query) ||
             query.includes(x.name.toLowerCase()) ||
             x.content.toLowerCase().includes(query) ||
-            query.includes(x.content.toLowerCase())
-        ),
+            query.includes(x.content.toLowerCase()),
         selectMenuOption: (sel, i) => ({
             label: resize(sel.name),
             description: sel.type === 'role' ? `Rôle <@&${sel.content}>` : resize(sel.content),
@@ -146,105 +186,122 @@ export const getItem = async({ guild, interaction, user }: { guild: guildResolva
         }),
         elementName: 'items',
         modal: {
-            title: "Item",
+            title: 'Item',
             label: 'Nom',
             placeholder: "Nom de l'item"
         },
         deleteModal: false
     });
-}
+};
 export const select = <T, D extends boolean>({
-    interaction, user, list, selectMenuOption, filter,
-    modal = { title: "Recherche d'éléments", label: 'Recherche', placeholder: "votre recherche" },
+    interaction,
+    user,
+    list,
+    selectMenuOption,
+    filter,
+    modal = { title: "Recherche d'éléments", label: 'Recherche', placeholder: 'votre recherche' },
     elementName = 'éléments',
     deleteModal = true as D
 }: selectOptions<T, D>): selectReturn<T, D> => {
     return new Promise(async (resolve) => {
-        await interaction.showModal(
-            new ModalBuilder()
-                .setTitle(modal?.title ?? "Recherche d'éléments")
-                .setCustomId('select-item')
-                .setComponents(
-                    row(
-                        new TextInputBuilder()
-                            .setRequired(true)
-                            .setLabel(modal?.label ?? 'Élément')
-                            .setCustomId('query')
-                            .setPlaceholder(modal?.placeholder ?? 'votre recherche')
-                            .setStyle(TextInputStyle.Short)
+        await interaction
+            .showModal(
+                new ModalBuilder()
+                    .setTitle(modal?.title ?? "Recherche d'éléments")
+                    .setCustomId('select-item')
+                    .setComponents(
+                        row(
+                            new TextInputBuilder()
+                                .setRequired(true)
+                                .setLabel(modal?.label ?? 'Élément')
+                                .setCustomId('query')
+                                .setPlaceholder(modal?.placeholder ?? 'votre recherche')
+                                .setStyle(TextInputStyle.Short)
+                        )
                     )
-                )
-        ).catch(log4js.trace)
-        const rep = await interaction.awaitModalSubmit({
-            time: 300000
-        }).catch(log4js.trace)
+            )
+            .catch(log4js.trace);
+        const rep = await interaction
+            .awaitModalSubmit({
+                time: 300000
+            })
+            .catch(log4js.trace);
         if (!rep) return resolve(void 0);
 
-        const query = rep.fields.getTextInputValue('query').toLowerCase()
+        const query = rep.fields.getTextInputValue('query').toLowerCase();
 
-        const selected = list.filter(x => filter(x, query))
-    
+        const selected = list.filter((x) => filter(x, query));
+
         const defer = () => {
-            rep.deferUpdate().catch(log4js.trace)
-        }
+            rep.deferUpdate().catch(log4js.trace);
+        };
         const resolver = (value?: T) => {
             if (deleteModal) {
-                defer()
-                if (!!value) return resolve(value)
-                return resolve()
+                defer();
+                if (!!value) return resolve(value);
+                return resolve();
             } else {
-                if (!!value) return resolve({
-                    interaction: rep,
-                    value
-                })
-                resolve()
+                if (!!value)
+                    return resolve({
+                        interaction: rep,
+                        value
+                    });
+                resolve();
             }
-        }
-        if (!selected.size) {
-            return resolver()
         };
+        if (!selected.size) {
+            return resolver();
+        }
         if (selected.size === 1) {
             return resolver(selected.first());
         }
 
         const components = () => {
-            const base = (i: number) => new StringSelectMenuBuilder().setCustomId(i.toString()).setMaxValues(1)
+            const base = (i: number) => new StringSelectMenuBuilder().setCustomId(i.toString()).setMaxValues(1);
             const rows = [base(0)];
-            
+
             selected.toJSON().forEach((sel, i) => {
-                if (i % 25 === 0 && i > 0) rows.push(base(i))
+                if (i % 25 === 0 && i > 0) rows.push(base(i));
 
                 rows[rows.length - 1].addOptions(selectMenuOption(sel, i));
+            });
+
+            return rows.map((x) => row(x));
+        };
+
+        const msg = (await rep
+            .reply({
+                content: `**${numerize(
+                    selected.size
+                )}** ${elementName} correspondent à votre recherche. Lequel souhaitez-vous utiliser ?`,
+                components: components(),
+                fetchReply: true
             })
-
-            return rows.map(x => row(x));
-        }
-
-        const msg = await rep.reply({
-            content: `**${numerize(selected.size)}** ${elementName} correspondent à votre recherche. Lequel souhaitez-vous utiliser ?`,
-            components: components(),
-            fetchReply: true
-        }).catch(log4js.trace) as Message<true>;
+            .catch(log4js.trace)) as Message<true>;
         if (!msg) return resolve();
 
         const res = await waitForInteraction({
             componentType: ComponentType.StringSelect,
             user,
             message: msg
-        }).catch(log4js.trace)
+        }).catch(log4js.trace);
 
-        if (!res) return resolver()
-        const id = typeof [...list.keys()][0] === 'string' ? res.values[0] : parseInt(res.values[0])
+        if (!res) return resolver();
+        const id = typeof [...list.keys()][0] === 'string' ? res.values[0] : parseInt(res.values[0]);
 
-        return resolver(selected.get(id))
-    }) as selectReturn<T, D>
-}
-export const confirm = <T extends CommandInteraction | ButtonInteraction | AnySelectMenuInteraction | ContextMenuCommandInteraction>({
+        return resolver(selected.get(id));
+    }) as selectReturn<T, D>;
+};
+export const confirm = <
+    T extends CommandInteraction | ButtonInteraction | AnySelectMenuInteraction | ContextMenuCommandInteraction
+>({
     interaction,
     user,
     content = { content: `Êtes-vous sûr ?` },
     time = 120000,
-    components = [row(button({ label: 'Oui', style: 'Success', id: 'yes' }), button({ label: 'Non', style: 'Danger', id: 'no' }))],
+    components = [
+        row(button({ label: 'Oui', style: 'Success', id: 'yes' }), button({ label: 'Non', style: 'Danger', id: 'no' }))
+    ],
     ephemeral = false
 }: {
     interaction: T;
@@ -257,16 +314,15 @@ export const confirm = <T extends CommandInteraction | ButtonInteraction | AnySe
     return new Promise(async (resolve) => {
         let msg: Message<true>;
 
-        const ctxContent = <U extends boolean = false>(fetch?: U) => ({ ...content, fetchReply: fetch ?? false, components, ephemeral }) as InteractionReplyOptions & { fetchReply: U }
+        const ctxContent = <U extends boolean = false>(fetch?: U) =>
+            ({ ...content, fetchReply: fetch ?? false, components, ephemeral }) as InteractionReplyOptions & {
+                fetchReply: U;
+            };
         if (interaction.replied || interaction.deferred) {
-            interaction
-                .editReply(ctxContent())
-                .catch(() => {});
+            interaction.editReply(ctxContent()).catch(() => {});
             msg = (await interaction.fetchReply().catch(() => {})) as Message<true>;
         } else {
-            msg = (await interaction
-                .reply(ctxContent(true))
-                .catch(log4js.trace)) as Message<true>;
+            msg = (await interaction.reply(ctxContent(true)).catch(log4js.trace)) as Message<true>;
         }
 
         const reply = await waitForInteraction({
@@ -283,35 +339,35 @@ export const confirm = <T extends CommandInteraction | ButtonInteraction | AnySe
         });
     });
 };
-export const getStationByUrl = (url: string) => stations().find(x => x.url === url)
+export const getStationByUrl = (url: string) => stations().find((x) => x.url === url);
 export const addStation = (station: station) => {
     if (!getStationByUrl(station.url)) {
-        stationsList.push(station)
-        writeFileSync('./dist/data/stations.json', JSON.stringify(stationsList, null, 4))
+        stationsList.push(station);
+        writeFileSync('./dist/data/stations.json', JSON.stringify(stationsList, null, 4));
     }
-}
+};
 export const removeStation = (station: station) => {
     if (getStationByUrl(station.url)) {
-        stationsList.splice(stationsList.indexOf(stationsList.find(x => x.url === station.url)), 1);
-        writeFileSync('./dist/data/stations.json', JSON.stringify(stationsList, null, 4))
+        stationsList.splice(stationsList.indexOf(stationsList.find((x) => x.url === station.url)), 1);
+        writeFileSync('./dist/data/stations.json', JSON.stringify(stationsList, null, 4));
     }
-}
-export const selectStation = async({ user, interaction }: { user: User; interaction: ButtonInteraction }) => {
+};
+export const selectStation = async ({ user, interaction }: { user: User; interaction: ButtonInteraction }) => {
     const rep = await select({
         user,
         interaction,
-        list: new Collection(stations().map(x => [x.url, x])),
+        list: new Collection(stations().map((x) => [x.url, x])),
         filter: (opt, query) => opt.name.toLowerCase().includes(query) || query.includes(opt.name.toLowerCase()),
         selectMenuOption: (opt) => ({ label: opt.name, description: `Musique ${opt.name}`, value: opt.url }),
         elementName: 'musiques',
         modal: {
-            title: "Recherche de musiques",
+            title: 'Recherche de musiques',
             label: 'Musique',
-            placeholder: "Nom de la musique"
+            placeholder: 'Nom de la musique'
         },
         deleteModal: true
-    }).catch(log4js.trace)
+    }).catch(log4js.trace);
     if (!rep) return;
     return rep;
-}
-export const pingRole = (role: Role | string) => `<@&${role instanceof Role ? role.id : role}>`
+};
+export const pingRole = (role: Role | string) => `<@&${role instanceof Role ? role.id : role}>`;

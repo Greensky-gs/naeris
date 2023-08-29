@@ -1,17 +1,19 @@
-import { Precondition, log4js } from "amethystjs";
-import { getNode } from "../utils/toolbox";
-import { notPlaying } from "../utils/contents";
+import { Precondition, log4js } from 'amethystjs';
+import { getNode } from '../utils/toolbox';
+import { notPlaying } from '../utils/contents';
 
 export default new Precondition('playing').setChatInputRun(({ interaction }) => {
     const run = () => {
-        interaction.reply({
-            embeds: [ notPlaying(interaction) ],
-            ephemeral: true
-        }).catch(log4js.trace)
-    }
-    const node = getNode(interaction)
+        interaction
+            .reply({
+                embeds: [notPlaying(interaction)],
+                ephemeral: true
+            })
+            .catch(log4js.trace);
+    };
+    const node = getNode(interaction);
     if (!node) {
-        run()
+        run();
         return {
             ok: false,
             type: 'chatInput',
@@ -19,10 +21,10 @@ export default new Precondition('playing').setChatInputRun(({ interaction }) => 
             metadata: {
                 silent: true
             }
-        }
+        };
     }
     if (!node.isPlaying() && !node.node.isPaused() && !node.node.isPlaying()) {
-        run()
+        run();
         return {
             ok: false,
             type: 'chatInput',
@@ -30,12 +32,12 @@ export default new Precondition('playing').setChatInputRun(({ interaction }) => 
             metadata: {
                 silent: true
             }
-        }
+        };
     }
 
     return {
         ok: true,
         type: 'chatInput',
         interaction
-    }
-})
+    };
+});

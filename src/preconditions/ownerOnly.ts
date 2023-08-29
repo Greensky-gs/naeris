@@ -1,13 +1,15 @@
-import { Precondition, log4js } from "amethystjs";
-import owners from '../data/owners.json'
-import { ownerOnly } from "../utils/contents";
+import { Precondition, log4js } from 'amethystjs';
+import owners from '../data/owners.json';
+import { ownerOnly } from '../utils/contents';
 
 export default new Precondition('bot owner only').setButtonRun(({ button, user }) => {
     if (!owners.includes(user.id)) {
-        button.reply({
-            embeds: [ ownerOnly(button) ],
-            ephemeral: true
-        }).catch(log4js.trace)
+        button
+            .reply({
+                embeds: [ownerOnly(button)],
+                ephemeral: true
+            })
+            .catch(log4js.trace);
         return {
             ok: false,
             type: 'button',
@@ -15,7 +17,7 @@ export default new Precondition('bot owner only').setButtonRun(({ button, user }
             metadata: {
                 silent: true
             }
-        }
+        };
     }
     return {
         ok: true,
@@ -24,5 +26,5 @@ export default new Precondition('bot owner only').setButtonRun(({ button, user }
         metadata: {
             silent: true
         }
-    }
-})
+    };
+});
