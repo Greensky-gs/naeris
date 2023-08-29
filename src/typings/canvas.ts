@@ -1,6 +1,6 @@
 import { account } from 'coins-manager';
 import { PlayerTimestamp } from 'discord-player';
-import { Guild } from 'discord.js';
+import { Guild, User } from 'discord.js';
 import { inventoryItem } from 'shop-manager';
 
 export type coinsImage = {
@@ -35,3 +35,6 @@ export type playingImage = {
     songName: string;
     seed?: 0 | 1 | 2 | 3;
 };
+export type welcomeImage = {
+    user: User;
+}

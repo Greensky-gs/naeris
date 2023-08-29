@@ -7,6 +7,8 @@ declare global {
             password: string;
             host: string;
             panel: string;
+            guild: string;
+            join: string;
         }
     }
 }

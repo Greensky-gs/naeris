@@ -1,6 +1,7 @@
 import { createCanvas, loadImage, registerFont } from 'canvas';
-import { coinsImage, inventoryImage, leaderboardImage, playingImage } from '../typings/canvas';
+import { coinsImage, inventoryImage, leaderboardImage, playingImage, welcomeImage } from '../typings/canvas';
 import { numerize } from './toolbox';
+import { log4js } from 'amethystjs';
 
 registerFont('./assets/fonts/vinque/vinque_rg.otf', { family: 'Vinque' });
 registerFont('./assets/fonts/augusta/Augusta.ttf', { family: 'Augusta' });
@@ -244,4 +245,40 @@ export const canvasPlaying = async (data: playingImage) => {
     ctx.fillText(data.timestamp.total.label, toX - ctx.measureText(data.timestamp.total.label).width, timestampY);
 
     return canvas;
+};
+export const joinCanvas = async(data: welcomeImage) => {
+    const [background, pp] = await Promise.all([loadImage(`./assets/images/join${Math.floor(Math.random() * 4)}.jpg`), loadImage(data.user.displayAvatarURL({ forceStatic: true, extension: 'jpg', size: 256 }))])
+    if (!background || !pp) return;
+
+    const canvas = createCanvas(background.width, background.height)
+    const ctx = canvas.getContext('2d')
+
+    ctx.drawImage(background, 0, 0)
+
+    const x = canvas.width / 2
+    const y = canvas.height / 2 - 60
+    const radius = pp.width / 2
+    const lineWidth = 2
+
+    ctx.font = '40px Vinque'
+    ctx.fillStyle = 'white';
+    const textWidth = ctx.measureText(data.user.username).width
+
+    ctx.fillStyle = 'rgb(250, 250, 250)'
+    ctx.fillText(data.user.username, x - textWidth / 2, y - radius - 30)
+
+    ctx.beginPath()
+    ctx.strokeStyle = 'white'
+    ctx.arc(x, y, radius + lineWidth - 1, 0, Math.PI * 2)
+    ctx.closePath()
+    ctx.stroke()
+
+    ctx.beginPath()
+    ctx.arc(x, y, radius, 0, Math.PI * 2)
+    ctx.closePath()
+    ctx.clip()
+
+    ctx.drawImage(pp, x - radius, y - radius)
+
+    return canvas
 };
