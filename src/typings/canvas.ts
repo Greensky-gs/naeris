@@ -1,4 +1,6 @@
 import { account } from "coins-manager";
+import { Guild } from "discord.js";
+import { inventoryItem } from "shop-manager";
 
 export type coinsImage = {
     coins: account<'multiguild'>;
@@ -14,4 +16,16 @@ export type leaderboardImage = {
         pp: string;
     };
     place: number;
+}
+export type inventoryImage = {
+    user: {
+        username: string;
+        /**
+         * 128 formats
+         * JPG extension
+         */
+        pp: string;
+    },
+    items: inventoryItem[];
+    guild: Guild;
 }

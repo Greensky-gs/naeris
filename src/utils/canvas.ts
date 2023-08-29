@@ -1,8 +1,9 @@
 import { createCanvas, loadImage, registerFont } from "canvas";
-import { coinsImage, leaderboardImage } from "../typings/canvas";
+import { coinsImage, inventoryImage, leaderboardImage } from "../typings/canvas";
 import { numerize } from "./toolbox";
 
 registerFont('./assets/fonts/vinque/vinque_rg.otf', { family: 'Vinque' })
+registerFont('./assets/fonts/augusta/Augusta.ttf', { family: 'Augusta' })
 
 export const canvasCoins = async(data: coinsImage) => {
     const [ background, pp ] = await Promise.all([ loadImage('./assets/images/coins.jpg'), loadImage(data.user.pp) ]);
@@ -121,6 +122,78 @@ export const canvasLeaderboard = async(data: leaderboardImage[]) => {
         ctx.drawImage(canvas, 0, 0);
         canvas = newCanvas;
     }
+
+    return canvas;
+}
+export const canvasInventory = async(data: inventoryImage) => {
+    const [background, pp] = await Promise.all([ loadImage('./assets/images/coins.jpg'), loadImage(data.user.pp) ]);
+    if (!background || !pp) return;
+
+    const canvas = createCanvas(background.width, background.height);
+    const ctx = canvas.getContext('2d')
+
+    ctx.drawImage(background, 0, 0)
+
+    const padding = 40;
+    const imageRadius = 64;
+    const lineWidth = 2
+
+    const drawUser = () => {
+        const x = padding + imageRadius;
+        const y = x;
+
+        ctx.fillStyle = 'white'
+        ctx.font = '55px Augusta'
+
+        ctx.fillText(data.user.username, padding * 2 + imageRadius * 2, y)
+
+        ctx.beginPath()
+        ctx.arc(x, y, imageRadius + lineWidth, 0, Math.PI * 2)
+        ctx.closePath()
+        ctx.fill()
+
+        ctx.beginPath()
+        ctx.arc(x, y, imageRadius, 0, Math.PI * 2)
+        ctx.closePath()
+        ctx.clip()
+
+        ctx.drawImage(pp, x - imageRadius, y - imageRadius)
+    }
+
+    const items = () => {
+        const x = (i: number) => padding * 3 + lineWidth * 2;
+        const y = (i: number) => imageRadius * 2 + (100 * i) + (padding * (i + 3))
+
+        data.items.forEach((item, i) => {
+            ctx.font = '45px Vinque';
+            ctx.fillStyle = 'white'
+
+            ctx.fillText(item.name, x(i), y(i))            
+
+            if (item.quantity > 1) {
+                ctx.font = '40px Vinque'
+                const posX = x(i) + ctx.measureText(item.name).width + 45
+
+                ctx.fillText(`x${item.quantity}`, posX, y(i));
+            }
+
+            const xX = x(i)
+            const yY = y(i) + 45
+
+            ctx.font = '35px Vinque'
+
+            if (item.type === 'string') {
+                ctx.fillText(item.content, xX, yY);
+            } else {
+                const role = data.guild.roles.cache.get(item.content);
+                ctx.fillStyle = role.hexColor ?? data.guild.members.me.displayHexColor;
+                ctx.fillText(`@${role.name ?? 'rôle inconnu'}`, xX, yY)
+            }
+        })
+    }
+
+    items()
+    drawUser()
 
     return canvas;
 }
