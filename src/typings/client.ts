@@ -9,7 +9,8 @@ export enum ButtonIds {
     addItem = 'panel.add-item',
     removeItem = 'panel.remove-item',
     createStation = 'panel.add-station',
-    deleteStation = 'panel.delete-station'
+    deleteStation = 'panel.delete-station',
+    editItem = 'panel.edit-item'
 }
 
 export type paginatorOptions<T = any> = {

@@ -30,3 +30,4 @@ export const alreadyPlaying = (user: userResolvable) => baseDenied(user, 'musiqu
 export const notPlaying = (user: userResolvable) => baseDenied(user, "pas de musique").setDescription(`Je ne suis pas en train de jouer de la musique`)
 export const notSameChannel = (user: userResolvable) => baseDenied(user, 'Pas le même salon').setDescription(`Vous n'êtes pas connecté dans le même salon que moi`)
 export const ownerOnly = (user: userResolvable) => baseDenied(user, "Propriétaire uniquement").setDescription(`Seul le propriétaire du bot est autorisé à effectuer cette commande`)
+export const baseValid = (user: userResolvable) => base(user).setColor('#16878E');

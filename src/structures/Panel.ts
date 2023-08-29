@@ -39,24 +39,29 @@ export class Panel {
         ),
         row(
             button({
-                label: 'Créer un item',
-                style: 'Primary',
-                id: ButtonIds.addItem
-            }),
-            button({
-                label: 'Supprimer un item',
-                style: 'Primary',
-                id: ButtonIds.removeItem
-            }),
-            button({
                 label: 'Ajouter une musique',
-                style: 'Secondary',
+                style: 'Primary',
                 id: ButtonIds.createStation
             }),
             button({
                 label: 'Supprimer une musique',
-                style: 'Secondary',
+                style: 'Primary',
                 id: ButtonIds.deleteStation
+            }),
+            button({
+                label: 'Créer un item',
+                style: 'Secondary',
+                id: ButtonIds.addItem
+            }),
+            button({
+                label: 'Supprimer un item',
+                style: 'Secondary',
+                id: ButtonIds.removeItem
+            }),
+            button({
+                label: 'Modifier un item',
+                style: 'Secondary',
+                id: ButtonIds.editItem
             })
         )]
     }

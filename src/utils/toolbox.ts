@@ -1,4 +1,4 @@
-import { ActionRowBuilder, AnyComponentBuilder, AnySelectMenuInteraction, BaseInteraction, ButtonBuilder, ButtonInteraction, ButtonStyle, Collection, CommandInteraction, ComponentType, ContextMenuCommandInteraction, Guild, GuildMember, InteractionReplyOptions, Message, ModalBuilder, SelectMenuComponentOptionData, StringSelectMenuBuilder, TextInputBuilder, TextInputStyle, User } from "discord.js";
+import { ActionRowBuilder, AnyComponentBuilder, AnySelectMenuInteraction, BaseInteraction, ButtonBuilder, ButtonInteraction, ButtonStyle, Collection, CommandInteraction, ComponentType, ContextMenuCommandInteraction, Guild, GuildMember, InteractionReplyOptions, Message, ModalBuilder, Role, SelectMenuComponentOptionData, StringSelectMenuBuilder, TextInputBuilder, TextInputStyle, User } from "discord.js";
 import perms from '../data/perms.json';
 import { confirmReturn, permType, selectOptions, selectReturn } from "../typings/utils";
 import { station } from "../typings/station";
@@ -187,13 +187,24 @@ export const select = <T, D extends boolean>({
         const defer = () => {
             rep.deferUpdate().catch(log4js.trace)
         }
+        const resolver = (value?: T) => {
+            if (deleteModal) {
+                defer()
+                if (!!value) return resolve(value)
+                return resolve()
+            } else {
+                if (!!value) return resolve({
+                    interaction: rep,
+                    value
+                })
+                resolve()
+            }
+        }
         if (!selected.size) {
-            defer()
-            return resolve()
+            return resolver()
         };
         if (selected.size === 1) {
-            defer()
-            return resolve(selected.first());
+            return resolver(selected.first());
         }
 
         const components = () => {
@@ -221,12 +232,11 @@ export const select = <T, D extends boolean>({
             user,
             message: msg
         }).catch(log4js.trace)
-        rep.deleteReply().catch(log4js.trace)
 
-        if (!res) return resolve()
+        if (!res) return resolver()
         const id = typeof [...list.keys()][0] === 'string' ? res.values[0] : parseInt(res.values[0])
 
-        return resolve(selected.get(id))
+        return resolver(selected.get(id))
     }) as selectReturn<T, D>
 }
 export const confirm = <T extends CommandInteraction | ButtonInteraction | AnySelectMenuInteraction | ContextMenuCommandInteraction>({
@@ -298,8 +308,10 @@ export const selectStation = async({ user, interaction }: { user: User; interact
             title: "Recherche de musiques",
             label: 'Musique',
             placeholder: "Nom de la musique"
-        }
+        },
+        deleteModal: true
     }).catch(log4js.trace)
     if (!rep) return;
     return rep;
 }
+export const pingRole = (role: Role | string) => `<@&${role instanceof Role ? role.id : role}>`
