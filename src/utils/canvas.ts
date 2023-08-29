@@ -1,5 +1,5 @@
 import { createCanvas, loadImage, registerFont } from "canvas";
-import { coinsImage, inventoryImage, leaderboardImage } from "../typings/canvas";
+import { coinsImage, inventoryImage, leaderboardImage, playingImage } from "../typings/canvas";
 import { numerize } from "./toolbox";
 
 registerFont('./assets/fonts/vinque/vinque_rg.otf', { family: 'Vinque' })
@@ -196,4 +196,52 @@ export const canvasInventory = async(data: inventoryImage) => {
     drawUser()
 
     return canvas;
+}
+export const canvasPlaying = async(data: playingImage) => {
+    const background = await loadImage(`./assets/images/playing${Math.floor(Math.random() * 4)}.png`).catch(() => {})
+    if (!background) return
+
+    const canvas = createCanvas(background.width, background.height)
+    const ctx = canvas.getContext('2d')
+
+    ctx.drawImage(background, 0, 0)
+    const y = canvas.height / 2
+    const x = 30;
+    const toX = canvas.width - 30;
+    const barHeight = 15
+
+    ctx.fillStyle = 'white'
+    ctx.beginPath()
+    ctx.roundRect(x, y, toX - x, barHeight, barHeight / 2)
+    ctx.closePath()
+    ctx.fill()
+
+    ctx.strokeStyle = 'black'
+    ctx.beginPath()
+    ctx.roundRect(x - 1, y - 1, toX - x + 1, barHeight + 2, (barHeight + 2) / 2)
+    ctx.closePath()
+    ctx.stroke()
+
+    const progress = data.timestamp.current.value * 100  / data.timestamp.total.value
+    const middleW = (toX - x) * progress / 100
+    ctx.fillStyle = '#0074CF';
+    ctx.beginPath()
+    ctx.roundRect(x, y, middleW, barHeight, barHeight / 2)
+    ctx.closePath()
+    ctx.fill()
+
+    const textY = y - 30;
+
+    ctx.font = '20px Vinque'
+    ctx.fillStyle = 'black'
+    ctx.fillText(data.songName, x, textY)
+
+    ctx.font = '18px Augusta'
+    ctx.fillStyle = 'white'
+    const timestampY = y - 10
+
+    ctx.fillText(data.timestamp.current.label, x, timestampY)
+    ctx.fillText(data.timestamp.total.label, toX - ctx.measureText(data.timestamp.total.label).width, timestampY)
+
+    return canvas
 }
