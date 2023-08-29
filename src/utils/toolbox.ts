@@ -1,13 +1,14 @@
-import { ActionRowBuilder, AnyComponentBuilder, BaseInteraction, ButtonBuilder, ButtonInteraction, ButtonStyle, CommandInteraction, ComponentType, Guild, GuildMember, InteractionReplyOptions, Message, User } from "discord.js";
+import { ActionRowBuilder, AnyComponentBuilder, BaseInteraction, ButtonBuilder, ButtonInteraction, ButtonStyle, CommandInteraction, ComponentType, Guild, GuildMember, InteractionReplyOptions, Message, ModalBuilder, StringSelectMenuBuilder, TextInputBuilder, TextInputStyle, User } from "discord.js";
 import perms from '../data/perms.json';
 import { permType } from "../typings/utils";
 import { station } from "../typings/station";
 import stationsList from '../data/stations.json';
 import player from "../cache/player";
-import { guildResolvable, userResolvable } from "shop-manager";
+import { guildResolvable, item, userResolvable } from "shop-manager";
 import pnjs from '../data/pnj.json'
 import { pnj as pnjType } from "../typings/client";
 import shop from "../cache/shop";
+import { log4js, waitForInteraction } from "amethystjs";
 
 export const capitalize = (str: string) => {
     if (str.length < 1) return str;
@@ -127,19 +128,86 @@ export const resize = (str: string, length = 100) => {
     if (str.length <= length) return str;
     return str.slice(0, str.length - 2) + '...'
 }
-export const getItem = ({ query, guild, interaction, user }: { query: string; guild: guildResolvable; interaction: ButtonInteraction; user: User }) => {
-    const list = shop.guildItems(guild)
-    query = query.toLowerCase()
+export const getItem = ({ guild, interaction, user }: { guild: guildResolvable; interaction: ButtonInteraction; user: User }): Promise<void | item> => {
+    return new Promise(async (resolve) => {
+        await interaction.showModal(
+            new ModalBuilder()
+                .setTitle("Item")
+                .setCustomId('select-item')
+                .setComponents(
+                    row(
+                        new TextInputBuilder()
+                            .setRequired(true)
+                            .setLabel('item')
+                            .setCustomId('query')
+                            .setPlaceholder("Nom de l'item")
+                            .setStyle(TextInputStyle.Short)
+                    )
+                )
+        ).catch(log4js.trace)
+        const rep = await interaction.awaitModalSubmit({
+            time: 300000
+        }).catch(log4js.trace)
+        if (!rep) return resolve();
 
-    const selected = list.filter(x => 
-        x.name.toLowerCase().includes(query) ||
-        query.includes(x.name.toLowerCase()) ||
-        x.content.toLowerCase().includes(query) ||
-        query.includes(x.content.toLowerCase())
-    )
+        const query = rep.fields.getTextInputValue('query').toLowerCase()
+        const list = shop.guildItems(guild)
+    
+        const selected = list.filter(x => 
+            x.name.toLowerCase().includes(query) ||
+            query.includes(x.name.toLowerCase()) ||
+            x.content.toLowerCase().includes(query) ||
+            query.includes(x.content.toLowerCase())
+        )
+    
+        const defer = () => {
+            rep.deferUpdate().catch(log4js.trace)
+        }
+        if (!selected.size) {
+            defer()
+            return resolve()
+        };
+        if (selected.size === 1) {
+            defer()
+            return resolve(selected.first());
+        }
 
-    if (!selected.size) return undefined;
-    if (selected.size === 1) return selected
+        const components = () => {
+            const base = (i: number) => new StringSelectMenuBuilder().setCustomId(i.toString()).setMaxValues(1)
+            const rows = [base(0)];
+            
+            selected.forEach((sel, i) => {
+                if (i % 25 === 0 && i > 0) rows.push(base(i))
+
+                rows[rows.length - 1].addOptions({
+                    label: resize(sel.name),
+                    description: sel.type === 'role' ? `Rôle <@&${sel.content}>` : resize(sel.content),
+                    value: sel.id.toString()
+                });
+            })
+
+            return rows.map(x => row(x));
+        }
+
+        const msg = await rep.reply({
+            content: `**${numerize(selected.size)}** items correspondent à votre recherche. Lequel souhaitez-vous utiliser ?`,
+            components: components(),
+            fetchReply: true
+        }).catch(log4js.trace) as Message<true>;
+        if (!msg) return resolve();
+
+        const res = await waitForInteraction({
+            componentType: ComponentType.StringSelect,
+            user,
+            message: msg
+        }).catch(log4js.trace)
+        rep.deleteReply().catch(log4js.trace)
+
+        if (!res) return resolve()
+        const id = parseInt(res.values[0])
+
+        return resolve(selected.get(id))
+    })
 
     
 }

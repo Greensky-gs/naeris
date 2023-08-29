@@ -2,7 +2,7 @@ import { log4js } from "amethystjs";
 import { Client, Collection, Message, TextChannel } from "discord.js";
 import { base } from "../utils/contents";
 import { button, pingUser, row } from "../utils/toolbox";
-import { ButtonIds } from "../utils/client";
+import { ButtonIds } from "../typings/client";
 
 export class Panel {
     private client: Client;
@@ -35,6 +35,18 @@ export class Panel {
                 label: 'Redémarrer le bot',
                 style: 'Danger',
                 id: ButtonIds.reboot
+            })
+        ),
+        row(
+            button({
+                label: 'Créer un item',
+                style: 'Secondary',
+                id: ButtonIds.addItem
+            }),
+            button({
+                label: 'Supprimer un item',
+                style: 'Secondary',
+                id: ButtonIds.removeItem
             })
         )]
     }

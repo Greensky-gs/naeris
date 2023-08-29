@@ -5,7 +5,9 @@ export enum ButtonIds {
     addCoins = 'panel.coins.add',
     removeCoins = 'panel.coins.remove',
     disconnect = 'panel.disconnect',
-    reboot = 'panel.reboot-bot'
+    reboot = 'panel.reboot-bot',
+    addItem = 'panel.add-item',
+    removeItem = 'panel.remove-item'
 }
 
 export type paginatorOptions<T = any> = {
