@@ -1,6 +1,6 @@
-import { ActionRowBuilder, AnyComponentBuilder, BaseInteraction, ButtonBuilder, ButtonInteraction, ButtonStyle, CommandInteraction, ComponentType, Guild, GuildMember, InteractionReplyOptions, Message, ModalBuilder, StringSelectMenuBuilder, TextInputBuilder, TextInputStyle, User } from "discord.js";
+import { ActionRowBuilder, AnyComponentBuilder, AnySelectMenuInteraction, BaseInteraction, ButtonBuilder, ButtonInteraction, ButtonStyle, CommandInteraction, ComponentType, ContextMenuCommandInteraction, Guild, GuildMember, InteractionReplyOptions, Message, ModalBuilder, StringSelectMenuBuilder, TextInputBuilder, TextInputStyle, User } from "discord.js";
 import perms from '../data/perms.json';
-import { permType } from "../typings/utils";
+import { confirmReturn, permType } from "../typings/utils";
 import { station } from "../typings/station";
 import stationsList from '../data/stations.json';
 import player from "../cache/player";
@@ -211,3 +211,47 @@ export const getItem = ({ guild, interaction, user }: { guild: guildResolvable; 
 
     
 }
+export const confirm = <T extends CommandInteraction | ButtonInteraction | AnySelectMenuInteraction | ContextMenuCommandInteraction>({
+    interaction,
+    user,
+    content = { content: `Êtes-vous sûr ?` },
+    time = 120000,
+    components = [row(button({ label: 'Oui', style: 'Success', id: 'yes' }), button({ label: 'Non', style: 'Danger', id: 'no' }))],
+    ephemeral = false
+}: {
+    interaction: T;
+    user: User;
+    content?: InteractionReplyOptions;
+    time?: number;
+    components?: ActionRowBuilder<ButtonBuilder>[];
+    ephemeral?: boolean;
+}): Promise<confirmReturn<T>> => {
+    return new Promise(async (resolve) => {
+        let msg: Message<true>;
+
+        const ctxContent = <U extends boolean = false>(fetch?: U) => ({ ...content, fetchReply: fetch ?? false, components, ephemeral }) as InteractionReplyOptions & { fetchReply: U }
+        if (interaction.replied || interaction.deferred) {
+            interaction
+                .editReply(ctxContent())
+                .catch(() => {});
+            msg = (await interaction.fetchReply().catch(() => {})) as Message<true>;
+        } else {
+            msg = (await interaction
+                .reply(ctxContent(true))
+                .catch(log4js.trace)) as Message<true>;
+        }
+
+        const reply = await waitForInteraction({
+            componentType: ComponentType.Button,
+            user,
+            message: msg,
+            time
+        }).catch(() => {});
+
+        if (!reply) return resolve('cancel');
+        return resolve({
+            value: reply.customId === 'yes',
+            interaction: reply as T
+        });
+    });
+};
